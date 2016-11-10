@@ -62,6 +62,7 @@ public class MainFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String fileName = getFile();
                 ArrayList<String> sequence = new ArrayList<String> ();
+                String res = "";
                 try {
                     String encoding="GBK";
                     File file=new File(fileName);
@@ -72,6 +73,7 @@ public class MainFrame extends JFrame {
                         String lineTxt = null;
                         while((lineTxt = bufferedReader.readLine()) != null){
                             sequence.add(lineTxt);
+                            res += lineTxt+"\n";
                         }
                         read.close();
                     }else{
@@ -105,11 +107,50 @@ public class MainFrame extends JFrame {
                 }
 
 
-                Map<Integer,int[]> compareMap;
 
-                String res = "";
-                for (int i=0;i<sequence.size();i++){
-                    res += sequence.get(i)+"\n";
+
+                for (int i=1;i<sequence.size();i++){
+                    Map<Integer,ArrayList<Integer>> compareMap = new HashMap<Integer,ArrayList<Integer>>();
+                    for(int j =0;j<sequence.get(i).length();j++){
+                        char base = sequence.get(i).charAt(j);
+                        ArrayList<Integer> sites = new ArrayList<Integer>();
+                        for(int k : hashMap.get(base)){
+                            sites.add(j-k);
+                        }
+                        compareMap.put(j,sites);
+                    }
+
+                    System.out.println("第"+i+"组偏移量比较");
+                    Map<Integer,Integer> offsetMap = new HashMap<Integer,Integer>();
+                    for (int site : compareMap.keySet()){
+                        System.out.print(site+": ");
+                        for (Integer offset:compareMap.get(site)){
+                            if (!offsetMap.containsKey(offset)){
+                                offsetMap.put(offset,0);
+                            }
+                            offsetMap.put(offset,offsetMap.get(offset)+1);
+                            System.out.print(offset+" ");
+                        }
+                        System.out.println();
+                    }
+                    ArrayList<Integer> maxOffset = new ArrayList<Integer>();
+                    int max = -1;
+
+                    for (int offset : offsetMap.keySet()){
+                        System.out.println(offsetMap.get(offset)+" hahahahaha");
+                        if (offsetMap.get(offset)>max) {
+                            maxOffset.clear();
+                            maxOffset.add(offset);
+                            max = offsetMap.get(offset);
+                        }else if(offsetMap.get(offset) == max){
+                            maxOffset.add(offset);
+                        }
+                    }
+                    res += "第"+i+"组最大位移量: ";
+                    for (int offset : maxOffset){
+                        res += offset+" ";
+                    }
+                    res += "\n";
                 }
                 setResult(res);
             }
